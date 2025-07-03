@@ -39,3 +39,10 @@
 
 # debug information files
 *.dwo
+
+# QT
+*.user
+
+# Build folder 
+
+/build*/
