@@ -11,13 +11,13 @@ void taskSplit(const long long start, const long long end, std::promise<long lon
 {
     long long val = 0;
     for (long long i = start; i < end; ++i) {
-        val += 1;
+        val += i % 2;
     }
 
     prom.set_value(val);
 }
 
-void runTask(const int numThreads, const int endSum)
+auto runTask(const int numThreads, const long long endSum)
 {
     Threadpool pool(numThreads);
 
@@ -44,23 +44,46 @@ void runTask(const int numThreads, const int endSum)
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-    std::cout << "Result for " << numThreads << " threads" << std::endl;
-    std::cout << "Result: " << result << std::endl;
-    std::cout << "Execution time: " << duration.count() << " ms" << std::endl;
-    std::cout << "\n----------------------------------------------\n\n";
-
     pool.quit();
+
+    return duration;
+}
+
+void printCompTimeTable(const std::vector<std::pair<int, std::chrono::milliseconds>>& compTime)
+{
+    if (compTime.empty())
+        return;
+
+    std::cout << std::setw(10) << "Threads"
+              << std::setw(15) << "Time (ms)"
+              << std::setw(15) << "Speedup\n";
+    std::cout << std::string(40, '-') << "\n";
+
+    const auto single_thread_time = compTime[0].second;
+
+    for (const auto& [threads, duration] : compTime) {
+        auto time_ms = duration.count();
+        // Calculate speedup for each entry (relative to single-threaded time)
+        double speedup = (double)single_thread_time.count() / time_ms;
+
+        std::cout << std::setw(10) << threads
+                  << std::setw(15) << time_ms
+                  << std::setw(15) << std::fixed << std::setprecision(2) << speedup << "\n";
+    }
 }
 
 int main()
 {
-    const int endSum = 1e9;
+    const long long endSum = 1'000'000'000;
+    std::vector<std::pair<int, std::chrono::milliseconds>> compTime;
 
-    runTask(1, endSum);
+    compTime.push_back({ 1, runTask(1, endSum) });
 
     for (int numThreads = 2; numThreads < 13; numThreads += 2) {
-        runTask(numThreads, endSum);
+        compTime.push_back({ numThreads, runTask(numThreads, endSum) });
     }
+
+    printCompTimeTable(compTime);
 
     return 0;
 }
