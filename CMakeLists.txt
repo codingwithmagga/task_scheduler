@@ -5,4 +5,7 @@ project(task_scheduler LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(task_scheduler main.cpp)
+add_executable(task_scheduler main.cpp
+    thread_pool.h thread_pool.cpp
+    concurrent_queue.h
+)
