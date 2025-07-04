@@ -12,12 +12,7 @@ class Threadpool {
 public:
     Threadpool(const int numCores);
 
-    ~Threadpool()
-    {
-        for (auto& thread : threads) {
-            thread.join();
-        }
-    }
+    ~Threadpool();
 
     template <typename F, typename... Args>
     void submit(F&& func, Args&&... args)
@@ -38,31 +33,10 @@ public:
         cq.push([task]() { (*task)(); });
     }
 
-    void quit()
-    {
-        if (!running.exchange(false))
-            return;
-
-        // Push empty tasks to wake up all threads
-        for (size_t i = 0; i < threads.size(); ++i) {
-            cq.push([] { });
-        }
-    }
+    void quit();
 
 private:
-    void worker()
-    {
-        while (running) {
-            try {
-                auto task = cq.front();
-                task();
-            } catch (...) {
-                if (!running)
-                    break;
-                // Handle other exceptions if needed
-            }
-        }
-    }
+    void worker();
 
     std::vector<std::thread> threads;
     ConcurrentQueue<Func> cq;

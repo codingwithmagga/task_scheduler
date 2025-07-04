@@ -9,6 +9,8 @@ add_library(task_scheduler
     include/thread_pool.h
     src/thread_pool.cpp
     include/concurrent_queue.h
+    include/visualizer.h
+    src/visualizer.cpp
 )
 
 target_include_directories(task_scheduler
@@ -16,11 +18,7 @@ target_include_directories(task_scheduler
         include
 )
 
-add_executable(ex_adding_one
-    examples/main.cpp
-)
+add_subdirectory(examples/simple/)
+add_subdirectory(examples/monte_carlo_pi/)
+add_subdirectory(examples/matrix_multiplication/)
 
-target_link_libraries(ex_adding_one
-    PRIVATE
-        task_scheduler
-)
