@@ -21,4 +21,5 @@ target_include_directories(task_scheduler
 add_subdirectory(examples/simple/)
 add_subdirectory(examples/monte_carlo_pi/)
 add_subdirectory(examples/matrix_multiplication/)
+add_subdirectory(examples/priority_tasks/)
 

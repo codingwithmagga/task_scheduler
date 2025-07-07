@@ -4,11 +4,15 @@
 #include <mutex>
 #include <queue>
 
+enum class Priority { LOW,
+    MEDIUM,
+    HIGH };
+
 template <typename T>
 class ConcurrentQueue {
 
 public:
-    void push(const T& val)
+    void push(const T& val, const Priority priority = Priority::MEDIUM)
     {
         std::unique_lock lck(mut);
 
@@ -16,7 +20,7 @@ public:
             check_full.wait(lck, [this]() { return q.size() < max; });
         }
 
-        q.push(val);
+        q.push({ priority, val });
         check_empty.notify_all();
     }
 
@@ -28,15 +32,24 @@ public:
             check_empty.wait(lck, [this]() { return !q.empty(); });
         }
 
-        T val = q.front();
+        auto val = q.top();
         q.pop();
         check_full.notify_all();
 
-        return val;
+        return val.second;
     }
 
 private:
-    std::queue<T> q;
+    using PrioPair = std::pair<Priority, T>;
+
+    struct PrioPairCompare {
+        bool operator()(const PrioPair& p1, const PrioPair& p2)
+        {
+            return p1.first < p2.first;
+        }
+    };
+
+    std::priority_queue<PrioPair, std::vector<PrioPair>, PrioPairCompare> q;
     std::mutex mut;
     size_t max = 20;
 

@@ -5,12 +5,13 @@ A multithreaded task scheduler implemented in C++23, featuring a thread pool and
 ## Features
 
 - **Thread Pool**: Efficiently manages a pool of worker threads for parallel task execution
-- **Concurrent Queue**: Thread-safe queue for task scheduling
+- **Concurrent Queue**: Thread-safe priority queue for task scheduling
 - **Speedup Visualization**: Prints tables comparing execution time and speedup for different thread counts
-- **Benchmarking Examples**:
-  - Simple summation ([examples/simple/main.cpp](examples/simple/main.cpp))
-  - Monte Carlo Pi estimation ([examples/monte_carlo_pi/main.cpp](examples/monte_carlo_pi/main.cpp))
-  - Matrix multiplication ([examples/matrix_multiplication/main.cpp](examples/matrix_multiplication/main.cpp))
+- **Examples**:
+  - Benchmarking Simple summation ([examples/simple/main.cpp](examples/simple/main.cpp))
+  - Benchmarking Monte Carlo Pi estimation ([examples/monte_carlo_pi/main.cpp](examples/monte_carlo_pi/main.cpp))
+  - Benchmarking Matrix multiplication ([examples/matrix_multiplication/main.cpp](examples/matrix_multiplication/main.cpp))
+  - Priority Tasks ([examples/priority_tasks/main.cpp](examples/priority_tasks/main.cpp))
 
 ## Building
 
@@ -38,9 +39,12 @@ After building, run any of the example executables:
 
 # Matrix multiplication
 ./build/examples/matrix_multiplication/matrix_multiplication
+
+# Priority Tasks
+./build/examples/priority_tasks/priority_tasks
 ```
 
-Each example prints a table showing the speedup achieved with different thread counts which looks like this:
+Each of the first example prints a table showing the speedup achieved with different thread counts which looks like this:
 
 ```bash
    Threads      Time (ms)       Speedup
@@ -55,6 +59,21 @@ Each example prints a table showing the speedup achieved with different thread c
 ```
 
 Note that the matrix multiplication example does not show the expected speedup. This issue could be caused by different reasons, but I assume inefficient memory use and caching issues is a problem in this example.
+
+The last example shows which tasks are executed first, based on their priority
+
+```bash
+Run task with priority: HIGH
+Run task with priority: HIGH
+Run task with priority: HIGH
+Run task with priority: HIGH
+Run task with priority: HIGH
+Run task with priority: MEDIUM
+Run task with priority: MEDIUM
+Run task with priority: MEDIUM
+Run task with priority: LOW
+Run task with priority: LOW
+```
 
 ## License
 

@@ -6,7 +6,6 @@
 
 #include "concurrent_queue.h"
 
-using Func = std::function<void()>;
 class Threadpool {
 
 public:
@@ -15,22 +14,25 @@ public:
     ~Threadpool();
 
     template <typename F, typename... Args>
-    void submit(F&& func, Args&&... args)
+    void submitPrio(F&& func, const Priority& priority, Args&&... args)
     {
         if (!running)
             return;
 
         using ResultType = std::invoke_result_t<F, Args...>;
 
-        // Create a packaged_task to capture the function and arguments
         auto task = std::make_shared<std::packaged_task<ResultType()>>(
-            [func = std::forward<F>(func),
-                args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-                return std::apply(func, std::move(args));
+            [func = std::forward<F>(func), ... args = std::forward<Args>(args)]() mutable {
+                return std::invoke(func, std::move(args)...);
             });
 
-        // Wrap in a void() function for the queue
-        cq.push([task]() { (*task)(); });
+        cq.push([task]() { (*task)(); }, priority);
+    }
+
+    template <typename F, typename... Args>
+    void submit(F&& func, Args&&... args)
+    {
+        submitPrio(std::forward<F>(func), Priority::MEDIUM, std::forward<Args>(args)...);
     }
 
     void quit();
@@ -39,7 +41,7 @@ private:
     void worker();
 
     std::vector<std::thread> threads;
-    ConcurrentQueue<Func> cq;
+    ConcurrentQueue<std::function<void()>> cq;
     std::atomic<bool> running = true;
 };
 
